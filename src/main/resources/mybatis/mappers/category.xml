@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="category">
+
+	<select id="getList" resultType="CategoryVo">
+		<![CDATA[
+			SELECT c.cateNo, c.userNo, c.cateName, nvl(postCount, 0) postCount, description, c.regDate
+			FROM category c, (SELECT cateNo, count(postNo) postCount
+		                  	  FROM post
+		                 	  GROUP BY cateNo) p
+			WHERE c.cateNo = p.cateNo(+)
+			AND c.userNo = #{userNo}
+			ORDER BY c.cateNo DESC
+		]]>
+	</select>
+
+	<select id="getCateByUserNo" resultType="CategoryVo">
+		<![CDATA[
+			SELECT c.cateNo, c.userNo, c.cateName, nvl(postCount, 0) postCount, description, c.regDate
+			FROM category c, (SELECT cateNo, count(postNo) postCount
+		                  	  FROM post
+		                 	  GROUP BY cateNo) p
+			WHERE c.cateNo = p.cateNo(+)
+			AND c.userNo = #{userNo}
+			ORDER BY c.cateNo DESC
+		]]>
+	</select>
+	
+	<select id="selectCate" resultType="CategoryVo">
+		<![CDATA[
+			select cateNo, userNo, cateName, description, regDate 
+			from category 
+			where userNo = #{userNo}
+			order by cateName desc
+		]]>
+	</select>
+
+	<insert id="insert" parameterType="CategoryVo">
+		<selectKey keyProperty="cateNo" resultType="int" order="BEFORE">
+			select seq_category_no.nextval from dual
+		</selectKey>
+		<![CDATA[
+			insert into category
+            values (#{cateNo }, #{userNo }, #{cateName }, #{description }, default)
+		]]>	
+	</insert>
+	
+	<delete id="delete" parameterType="int">
+		<![CDATA[
+			delete from category 
+			where cateNo= #{cateNo} 
+		]]>
+	</delete>
+	
+	<select id = "postCount" parameterType = "int" resultType="int">
+		<![CDATA[
+			SELECT nvl(postCount, 0) postCount
+			FROM category c, (SELECT cateNo, count(postNo) postCount
+		                 	  FROM post
+		                 	  GROUP BY cateNo) p
+			WHERE c.cateNo = p.cateNo(+)
+			AND c.cateNo = #{cateNo}
+		]]>
+	</select>
+
+</mapper>
+
